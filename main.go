@@ -11,6 +11,7 @@ import (
 type Application struct {
 	Logger       *slog.Logger
 	ApiEndpoints []ApiEndpoint
+	TokenManager TokenManager
 }
 
 func main() {
@@ -37,6 +38,7 @@ func main() {
 	app := &Application{
 		Logger:       logger,
 		ApiEndpoints: Endpoints,
+		TokenManager: TokenManager{},
 	}
 
 	app.CreateEndpointAndAppend("SecurityMaxWaitTime", "/api/v2/sec-max-wait-time")
@@ -44,8 +46,7 @@ func main() {
 	app.Logger.Info("Aplikacja uruchomiona")
 	app.Logger.Info(app.GetEndpoints())
 
-	tm := TokenManager{}
-	token, err := tm.GetToken()
+	token, err := app.TokenManager.GetToken()
 	if err != nil {
 		fmt.Println(err)
 	}
