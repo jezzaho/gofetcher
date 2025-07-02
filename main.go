@@ -1,11 +1,11 @@
 package main
 
 import (
-	"context"
 	"flag"
+	"fmt"
 	"log"
 	"log/slog"
-	"net/http"
+	"os"
 )
 
 type Application struct {
@@ -16,6 +16,13 @@ type Application struct {
 func main() {
 
 	logDir := flag.String("logdir", "logs", "Katalog zapisu logów")
+
+	//  ENV
+	os.Setenv("AUTH_URL", "https://login.xovis.cloud/oauth/token")
+	os.Setenv("CLIENT_ID", "PLACEHOLDER")
+	os.Setenv("CLIENT_SECRET", "PLACEHOLDER")
+	os.Setenv("AUDIENCE", "https://api.xovis.cloud/aero/")
+	os.Setenv("TOKEN_CACHE", "token_cache.json")
 
 	flag.Parse()
 
@@ -37,8 +44,10 @@ func main() {
 	app.Logger.Info("Aplikacja uruchomiona")
 	app.Logger.Info(app.GetEndpoints())
 
-	endAddress := "https:/" + app.GetAddressByName("SecurityMaxWaitTime")
-
-	app.SendAuthorizationRequest(context.Background(), http.MethodGet, endAddress, nil, APIAuthConfig{AuthType: AuthBasic, Username: "user", Password: "pass"})
-
+	tm := TokenManager{}
+	token, err := tm.GetToken()
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(token)
 }
