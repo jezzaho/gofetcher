@@ -5,27 +5,26 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
-	"os"
+
+	"github.com/joho/godotenv"
 )
 
 type Application struct {
-	Logger       *slog.Logger
-	ApiEndpoints []ApiEndpoint
-	TokenManager TokenManager
+	Logger *slog.Logger
+	Token  *AuthToken
 }
 
 func main() {
 
 	logDir := flag.String("logdir", "logs", "Katalog zapisu logów")
 
-	//  ENV
-	os.Setenv("AUTH_URL", "https://login.xovis.cloud/oauth/token")
-	os.Setenv("CLIENT_ID", "PLACEHOLDER")
-	os.Setenv("CLIENT_SECRET", "PLACEHOLDER")
-	os.Setenv("AUDIENCE", "https://api.xovis.cloud/aero/")
-	os.Setenv("TOKEN_CACHE", "token_cache.json")
-
 	flag.Parse()
+
+	// load dot env
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
 	logger, file, err := CreateLogger(*logDir)
 	if err != nil {
@@ -33,22 +32,12 @@ func main() {
 	}
 	defer file.Close()
 
-	var Endpoints []ApiEndpoint
-
 	app := &Application{
-		Logger:       logger,
-		ApiEndpoints: Endpoints,
-		TokenManager: TokenManager{},
+		Logger: logger,
 	}
-
-	app.CreateEndpointAndAppend("SecurityMaxWaitTime", "/api/v2/sec-max-wait-time")
-
-	app.Logger.Info("Aplikacja uruchomiona")
-	app.Logger.Info(app.GetEndpoints())
-
-	token, err := app.TokenManager.GetToken()
+	token, err := app.GetValidToken()
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
-	fmt.Println(token)
+	fmt.Println("Access Token:", token.Token)
 }

@@ -29,7 +29,7 @@ func CreateLogger(logDir string) (*slog.Logger, *os.File, error) {
 
 	// JSON logger
 	handler := slog.NewJSONHandler(writer, &slog.HandlerOptions{
-		Level: slog.LevelInfo,
+		Level: slog.LevelDebug,
 		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
 			if a.Key != "time" {
 				return a
