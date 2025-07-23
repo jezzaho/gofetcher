@@ -6,6 +6,7 @@ import (
 	"log"
 	"log/slog"
 
+	"github.com/guptarohit/asciigraph"
 	"github.com/joho/godotenv"
 )
 
@@ -35,9 +36,27 @@ func main() {
 	app := &Application{
 		Logger: logger,
 	}
-	token, err := app.GetValidToken()
+	_, err = app.GetValidToken()
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Access Token:", token.Token)
+	// Try to fetch data
+	params := []string{"2025-06-15T15:30:00", "2025-06-15T16:30:00", "PT1M", "Waiting Time Display", "MAX"}
+
+	var HResponse *HistResponse
+	HResponse, err = FetchHistData(params)
+	if err != nil {
+		log.Fatal(err)
+	}
+	pred_waiting_time, err := HResponse.GetValuesByKPIType("PREDICTED_WAITING_TIME")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("%+v", pred_waiting_time)
+	values := make([]float64, len(pred_waiting_time))
+	for i, v := range pred_waiting_time {
+		values[i] = float64(v)
+	}
+	graph := asciigraph.Plot(values, asciigraph.Height(10), asciigraph.Caption("Predicted WT"))
+	fmt.Println(graph)
 }
