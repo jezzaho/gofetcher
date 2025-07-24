@@ -34,3 +34,6 @@ go.work.sum
 #Ignore logs folder
 logs/
 *.log
+
+#auth_token cache
+token_cache.json
